@@ -182,7 +182,7 @@ def jitter_perturbation_point_cloud(batch_data, sigma=0.005, clip=0.02):
 def save_pl(path, pl):
     if not os.path.exists(os.path.split(path)[0]):
         os.makedirs(os.path.split(path)[0])
-    myfile = file(path, "w")
+    myfile = open(path, "w")
     point_num = pl.shape[0]
     for j in range(point_num):
         if len(pl[j])==3:
@@ -250,8 +250,7 @@ class Fetcher(threading.Thread):
                     batch_input_data = new_batch_input
                 if self.use_norm:
                     batch_input_data, batch_data_gt = rotate_point_cloud_and_gt(batch_input_data,batch_data_gt)
-                    batch_input_data, batch_data_gt, scales = random_scale_point_cloud_and_gt( batch_input_data, batch_data_gt,
-                                                                                               scale_low=0.9, scale_high=1.1)
+                    batch_input_data, batch_data_gt, scales = random_scale_point_cloud_and_gt( batch_input_data, batch_data_gt, scale_low=0.9, scale_high=1.1)
                     radius = radius * scales
                     batch_input_data, batch_data_gt = shift_point_cloud_and_gt(batch_input_data, batch_data_gt,shift_range=0.1)
                     if np.random.rand() > 0.5:
@@ -267,8 +266,7 @@ class Fetcher(threading.Thread):
 
                 else:
                     batch_input_data, batch_data_gt = rotate_point_cloud_and_gt(batch_input_data,batch_data_gt)
-                    batch_input_data, batch_data_gt, scales = random_scale_point_cloud_and_gt(batch_input_data,batch_data_gt,
-                                                                                              scale_low=0.9,scale_high=1.5)
+                    batch_input_data, batch_data_gt, scales = random_scale_point_cloud_and_gt(batch_input_data,batch_data_gt, scale_low=0.9,scale_high=1.5)
                     radius = radius * scales
                     batch_input_data, batch_data_gt = shift_point_cloud_and_gt(batch_input_data,batch_data_gt, shift_range=0.3)
 
@@ -294,15 +292,22 @@ class Fetcher(threading.Thread):
         print("Remove all queue data")
 
 if __name__ == '__main__':
-    folder = '/home/lqyu/workspace/PointSR/perfect_models'
-    fetchworker = Fetcher(folder)
+    # folder = '/home/lqyu/workspace/PointSR/perfect_models'
+    # fetchworker = Fetcher(folder)
+    H5_FILENAME = "../h5_data/Patches_noHole_and_collected.h5"
+    NUM_POINT = 1024
+    BATCH_SIZE = 28
+    USE_DATA_NORM = True
+    USE_RANDOM_INPUT = True
+    input_data, gt_data, data_radius, _ = load_patch_data(h5_filename = H5_FILENAME, skip_rate=1, num_point=NUM_POINT, norm=USE_DATA_NORM, use_randominput = USE_RANDOM_INPUT)
+    fetchworker = Fetcher(input_data,gt_data,data_radius,BATCH_SIZE,NUM_POINT,USE_RANDOM_INPUT,USE_DATA_NORM)
     fetchworker.start()
 
     for cnt in range(200):
         start = time.time()
         input,gt,radius = fetchworker.fetch()
         assert len(input)==len(gt)
-        assert len(input)==32
+        # assert len(input)==32
         end = time.time()
         print(cnt,end-start)
         for i in range(len(input)):

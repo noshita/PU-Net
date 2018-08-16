@@ -21,11 +21,13 @@ parser.add_argument('--up_ratio',  type=int,  default=4,   help='Upsampling Rati
 parser.add_argument('--max_epoch', type=int, default=120, help='Epoch to run [default: 500]')
 parser.add_argument('--batch_size', type=int, default=28, help='Batch Size during training [default: 32]')
 parser.add_argument('--learning_rate', type=float, default=0.001)
+parser.add_argument('--h5_inputfile', default="../h5_data/Patches_noHole_and_collected.h5", help="input file for training")
 
 ASSIGN_MODEL_PATH=None
 USE_DATA_NORM = True
 USE_RANDOM_INPUT = True
 USE_REPULSION_LOSS = True
+
 
 FLAGS = parser.parse_args()
 PHASE = FLAGS.phase
@@ -36,6 +38,7 @@ UP_RATIO = FLAGS.up_ratio
 MAX_EPOCH = FLAGS.max_epoch
 BASE_LEARNING_RATE = FLAGS.learning_rate
 MODEL_DIR = FLAGS.log_dir
+H5_FILENAME = FLAGS.h5_inputfile
 
 print(socket.gethostname())
 print(FLAGS)
@@ -139,8 +142,7 @@ def train(assign_model_path=None):
             assign_saver.restore(sess, assign_model_path)
 
         ##read data
-        input_data, gt_data, data_radius, _ = data_provider.load_patch_data(skip_rate=1, num_point=NUM_POINT, norm=USE_DATA_NORM,
-                                                                                              use_randominput = USE_RANDOM_INPUT)
+        input_data, gt_data, data_radius, _ = data_provider.load_patch_data(h5_filename = H5_FILENAME, skip_rate=1, num_point=NUM_POINT, norm=USE_DATA_NORM, use_randominput = USE_RANDOM_INPUT)
 
         fetchworker = data_provider.Fetcher(input_data,gt_data,data_radius,BATCH_SIZE,NUM_POINT,USE_RANDOM_INPUT,USE_DATA_NORM)
         fetchworker.start()
