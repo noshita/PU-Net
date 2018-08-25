@@ -23,6 +23,7 @@ parser.add_argument('--batch_size', type=int, default=28, help='Batch Size durin
 parser.add_argument('--learning_rate', type=float, default=0.001)
 parser.add_argument('--h5_inputfile', default="../h5_data/Patches_noHole_and_collected.h5", help="input file for training")
 parser.add_argument('--prediction_input_dir', default='../data/test_data/our_collected_data/MC_5k', help='input directory for prediction')
+parser.add_argument('--prediction_ext_re', default="*.xyz", help='')
 
 ASSIGN_MODEL_PATH=None
 USE_DATA_NORM = True
@@ -41,6 +42,7 @@ BASE_LEARNING_RATE = FLAGS.learning_rate
 MODEL_DIR = FLAGS.log_dir
 H5_FILENAME = FLAGS.h5_inputfile
 PREDICTION_DIR = FLAGS.prediction_input_dir
+PREDICTION_EXT_RE = FLAGS.prediction_ext_re
 
 print(socket.gethostname())
 print(FLAGS)
@@ -198,7 +200,7 @@ def prediction_whole_model(data_folder=None,show=False,use_normal=False):
 
     if not os.path.exists(save_path):
         os.makedirs(save_path)
-    samples = glob(data_folder + "/*.xyz")
+    samples = glob(data_folder + "/" + PREDICTION_EXT_RE)
     samples.sort(reverse=True)
     input = np.loadtxt(samples[0])
 
@@ -217,7 +219,7 @@ def prediction_whole_model(data_folder=None,show=False,use_normal=False):
     config.allow_soft_placement = True
     with tf.Session(config=config) as sess:
         saver.restore(sess, restore_model_path)
-        samples = glob(data_folder+"/*.xyz")
+        samples = glob(data_folder+"/"+PREDICTION_EXT_RE)
         samples.sort()
         total_time = 0
         for i,item in enumerate(samples):
