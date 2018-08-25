@@ -22,6 +22,7 @@ parser.add_argument('--max_epoch', type=int, default=120, help='Epoch to run [de
 parser.add_argument('--batch_size', type=int, default=28, help='Batch Size during training [default: 32]')
 parser.add_argument('--learning_rate', type=float, default=0.001)
 parser.add_argument('--h5_inputfile', default="../h5_data/Patches_noHole_and_collected.h5", help="input file for training")
+parser.add_argument('--prediction_input_dir', default='../data/test_data/our_collected_data/MC_5k', help='input directory for prediction')
 
 ASSIGN_MODEL_PATH=None
 USE_DATA_NORM = True
@@ -39,6 +40,7 @@ MAX_EPOCH = FLAGS.max_epoch
 BASE_LEARNING_RATE = FLAGS.learning_rate
 MODEL_DIR = FLAGS.log_dir
 H5_FILENAME = FLAGS.h5_inputfile
+PREDICTION_DIR = FLAGS.prediction_input_dir
 
 print(socket.gethostname())
 print(FLAGS)
@@ -190,7 +192,7 @@ def train_one_epoch(sess, ops, fetchworker, train_writer):
 
 
 def prediction_whole_model(data_folder=None,show=False,use_normal=False):
-    data_folder = '../data/test_data/our_collected_data/MC_5k'
+    #data_folder = '../data/test_data/our_collected_data/MC_5k'
     phase = data_folder.split('/')[-2]+data_folder.split('/')[-1]
     save_path = os.path.join(MODEL_DIR, 'result/' + phase)
 
@@ -259,5 +261,7 @@ if __name__ == "__main__":
 
         train(assign_model_path=ASSIGN_MODEL_PATH)
         LOG_FOUT.close()
+    elif PHASE=="test":
+        prediction_whole_model("../data/test_data/our_collected_data/MC_5k")
     else:
-        prediction_whole_model()
+        prediction_whole_model(PREDICTION_DIR)
