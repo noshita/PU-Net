@@ -24,6 +24,7 @@ parser.add_argument('--learning_rate', type=float, default=0.001)
 parser.add_argument('--h5_inputfile', default="../h5_data/Patches_noHole_and_collected.h5", help="input file for training")
 parser.add_argument('--prediction_input_dir', default='../data/test_data/our_collected_data/MC_5k', help='input directory for prediction')
 parser.add_argument('--prediction_ext_re', default="*.xyz", help='')
+parser.add_argument('--use_normal', default=False, help='')
 
 ASSIGN_MODEL_PATH=None
 USE_DATA_NORM = True
@@ -43,6 +44,7 @@ MODEL_DIR = FLAGS.log_dir
 H5_FILENAME = FLAGS.h5_inputfile
 PREDICTION_DIR = FLAGS.prediction_input_dir
 PREDICTION_EXT_RE = FLAGS.prediction_ext_re
+USE_NORMAL = FLAGS.use_normal
 
 print(socket.gethostname())
 print(FLAGS)
@@ -66,7 +68,7 @@ def train(assign_model_path=None):
 
     #create the generator model
     pred,_ = MODEL_GEN.get_gen_model(pointclouds_pl, is_training, scope='generator',bradius=pointclouds_radius,
-                                                          reuse=None,use_normal=False, use_bn=False,use_ibn=False,
+                                                          reuse=None,use_normal=USE_NORMAL, use_bn=False,use_ibn=False,
                                                           bn_decay=bn_decay,up_ratio=UP_RATIO)
 
     #get emd loss
@@ -193,7 +195,7 @@ def train_one_epoch(sess, ops, fetchworker, train_writer):
     print('read data time: %s mean gen_loss_emd: %f' % (round(fetch_time,4), round(loss_sum.mean(),4)))
 
 
-def prediction_whole_model(data_folder=None,show=False,use_normal=False):
+def prediction_whole_model(data_folder=None,show=False,use_normal=USE_NORMAL):
     #data_folder = '../data/test_data/our_collected_data/MC_5k'
     phase = data_folder.split('/')[-2]+data_folder.split('/')[-1]
     save_path = os.path.join(MODEL_DIR, 'result/' + phase)
